@@ -4,7 +4,7 @@ import { signInController } from "../controllers/signInController.js";
 
 const registrationRoutes = express.Router();
 
-registrationRoutes.post("/signUp", signUpController);
-registrationRoutes.post("/signIn", signInController);
+registrationRoutes.post("/register", signUpController);
+registrationRoutes.post("/login", signInController);
 
 export default registrationRoutes;

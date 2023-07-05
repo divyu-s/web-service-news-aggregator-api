@@ -17,12 +17,8 @@ export const putPrefrencesController = async (req, res) => {
   if (req.user) {
     try {
       let value = await Joi.object({
-        preferences: Joi.object({
-          categories: Joi.array().required(),
-        }).required(),
-      }).validateAsync({
-        ...req.body,
-      });
+        categories: Joi.array().required(),
+      }).validateAsync(req.body);
       const userIndex = data.usersList.findIndex(
         (user) => user?.id === req?.user?.id
       );
