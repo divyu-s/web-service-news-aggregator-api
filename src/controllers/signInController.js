@@ -40,7 +40,7 @@ export const signInController = async (req, res) => {
         {
           id: user?.id,
         },
-        "This is a secret",
+        process.env.JWT_TOKEN_SECRET,
         {
           expiresIn: 86400,
         }

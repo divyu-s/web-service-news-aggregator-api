@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import registrationRoutes from "./routes/registrationRoutes.js";
 import preferencesRoutes from "./routes/preferencesRoutes.js";
 import newsRoutes from "./routes/newsRoute.js";
+import dotenv from "dotenv-flow";
+dotenv.config();
 
 const PORT = 3000;
 const app = express();

@@ -1,9 +1,5 @@
 import axios from "axios";
-import {
-  GNEWS_API_PATH,
-  GNEWS_API_KEY,
-  CATEGORY_MAPPING,
-} from "../constants/appConstant.js";
+import { GNEWS_API_PATH, CATEGORY_MAPPING } from "../constants/appConstant.js";
 
 /**
  * Method to get news article from a third party api and send responce back to client
@@ -31,7 +27,7 @@ export const getNewsController = (req, res) => {
         }
       }
     }
-    const path = `${GNEWS_API_PATH}?category=${query}&lang=en&apikey=${GNEWS_API_KEY}`;
+    const path = `${GNEWS_API_PATH}?category=${query}&lang=en&apikey=${process.env.GNEWS_API_KEY}`;
     axios
       .get(path)
       .then((resp) => {
