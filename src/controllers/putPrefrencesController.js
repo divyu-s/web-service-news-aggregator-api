@@ -22,7 +22,9 @@ export const putPrefrencesController = async (req, res) => {
       const userIndex = data.usersList.findIndex(
         (user) => user?.id === req?.user?.id
       );
-      data.usersList[userIndex].preferences = req.body;
+      data.usersList[userIndex].preferences = {
+        categories: req.body.categories,
+      };
       const writePath = path.join(__dirname, "..", "data.json");
       fs.writeFileSync(writePath, JSON.stringify(data), {
         encoding: "utf-8",
