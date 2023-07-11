@@ -1,6 +1,6 @@
 import joi from "joi";
 import bcrypt from "bcrypt";
-import { userSchema } from "../schema/userSchema.js";
+import { signUpUserSchema } from "../validators/signUpUserSchema.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -17,12 +17,9 @@ const __dirname = dirname(__filename);
  */
 export const signUpController = async (req, res) => {
   try {
-    let value = await userSchema.validateAsync({
+    let value = await signUpUserSchema.validateAsync({
       id: Date.now(),
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      preferences: { categories: [] },
+      ...req.body,
     });
     const user = data.usersList.find((user) => user.email === value.email);
     if (user) {

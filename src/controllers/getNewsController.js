@@ -1,4 +1,4 @@
-import axios from "axios";
+import { getData } from "../services/httpService.js";
 import { GNEWS_API_PATH, CATEGORY_MAPPING } from "../constants/appConstant.js";
 
 /**
@@ -28,8 +28,7 @@ export const getNewsController = (req, res) => {
       }
     }
     const path = `${GNEWS_API_PATH}?category=${query}&lang=en&apikey=${process.env.GNEWS_API_KEY}`;
-    axios
-      .get(path)
+    getData(path)
       .then((resp) => {
         res.status(200).json(resp.data.articles);
       })

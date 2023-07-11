@@ -2,6 +2,7 @@ import Joi from "joi";
 import data from "../data.json" assert { type: "json" };
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { signInUserSchema } from "../validators/signInUserSchema.js";
 
 /**
  * Method handles signIn process
@@ -11,18 +12,7 @@ import jwt from "jsonwebtoken";
  */
 export const signInController = async (req, res) => {
   try {
-    let value = await Joi.object({
-      email: Joi.string()
-        .email({
-          minDomainSegments: 2,
-          tlds: { allow: ["com", "net"] },
-        })
-        .required(),
-      password: Joi.string().min(8).required(),
-    }).validateAsync({
-      email: req.body.email,
-      password: req.body.password,
-    });
+    let value = await signInUserSchema.validateAsync(req.body);
     const user = data.usersList.find((user) => user.email === value.email);
     if (!user) {
       throw { message: "Email is not registered" };
