@@ -4,8 +4,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import devData from "../data.json" assert { type: "json" };
-import testData from "../data_test.json" assert { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,10 +16,12 @@ const __dirname = dirname(__filename);
 export const signUpController = async (req, res) => {
   let data;
   if (process.env.NODE_ENV === "test") {
-    data = testData;
+    data = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "..", "data_test.json"))
+    );
   }
   if (process.env.NODE_ENV === "dev") {
-    data = devData;
+    data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data.json")));
   }
 
   try {
