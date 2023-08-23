@@ -1,8 +1,8 @@
-import Joi from "joi";
-import data from "../data.json" assert { type: "json" };
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { signInUserSchema } from "../validators/signInUserSchema.js";
+import devData from "../data.json" assert { type: "json" };
+import testData from "../data_test.json" assert { type: "json" };
 
 /**
  * Method handles signIn process
@@ -11,12 +11,19 @@ import { signInUserSchema } from "../validators/signInUserSchema.js";
  * @returns
  */
 export const signInController = async (req, res) => {
+  let data;
+  if (process.env.NODE_ENV === "test") {
+    data = testData;
+  }
+  if (process.env.NODE_ENV === "dev") {
+    data = devData;
+  }
+
   try {
     let value = await signInUserSchema.validateAsync(req.body);
     const user = data.usersList.find((user) => user.email === value.email);
     if (!user) {
       throw { message: "Email is not registered" };
-      return;
     } else {
       const isPasswordVailed = bcrypt.compareSync(
         req.body.password,
@@ -24,7 +31,6 @@ export const signInController = async (req, res) => {
       );
       if (!isPasswordVailed) {
         throw { message: "Invailed Password" };
-        return;
       }
       const token = jwt.sign(
         {

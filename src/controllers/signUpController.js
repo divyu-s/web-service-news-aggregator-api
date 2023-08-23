@@ -1,11 +1,11 @@
-import joi from "joi";
 import bcrypt from "bcrypt";
 import { signUpUserSchema } from "../validators/signUpUserSchema.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import data from "../data.json" assert { type: "json" };
+import devData from "../data.json" assert { type: "json" };
+import testData from "../data_test.json" assert { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +16,14 @@ const __dirname = dirname(__filename);
  * @param {*} res
  */
 export const signUpController = async (req, res) => {
+  let data;
+  if (process.env.NODE_ENV === "test") {
+    data = testData;
+  }
+  if (process.env.NODE_ENV === "dev") {
+    data = devData;
+  }
+
   try {
     let value = await signUpUserSchema.validateAsync({
       id: Date.now(),
@@ -24,7 +32,6 @@ export const signUpController = async (req, res) => {
     const user = data.usersList.find((user) => user.email === value.email);
     if (user) {
       throw { message: "Email is already registered" };
-      return;
     }
     value = {
       ...value,
@@ -32,7 +39,10 @@ export const signUpController = async (req, res) => {
     };
     data.usersList.push(value);
 
-    const writePath = path.join(__dirname, "..", "data.json");
+    const writePath =
+      process.env.NODE_ENV === "test"
+        ? path.join(__dirname, "..", "data_test.json")
+        : path.join(__dirname, "..", "data.json");
     fs.writeFileSync(writePath, JSON.stringify(data), {
       encoding: "utf-8",
       flag: "w",
