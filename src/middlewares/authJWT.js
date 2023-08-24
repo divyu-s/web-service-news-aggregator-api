@@ -1,5 +1,11 @@
 import jwt from "jsonwebtoken";
-import data from "../data.json" assert { type: "json" };
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Method to verify JWT token and attach appropiate user in request
@@ -8,6 +14,16 @@ import data from "../data.json" assert { type: "json" };
  * @param {*} next
  */
 export const verifyToken = (req, res, next) => {
+  let data;
+  if (process.env.NODE_ENV === "test") {
+    data = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "..", "data_test.json"))
+    );
+  }
+  if (process.env.NODE_ENV === "dev") {
+    data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data.json")));
+  }
+
   if (
     req.headers &&
     req.headers.authorization &&

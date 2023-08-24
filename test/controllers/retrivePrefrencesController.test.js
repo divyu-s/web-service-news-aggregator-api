@@ -11,9 +11,10 @@ chai.use(chaiHttp);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-describe("Should verifies the signin flow", () => {
+describe("Should verifies retrive prefrences flow", () => {
   let singupBody;
   let fileContent;
+  let accessToken;
   beforeEach((done) => {
     fileContent = JSON.parse(
       fs.readFileSync(path.join(__dirname, "..", "..", "src", "data_test.json"))
@@ -23,7 +24,7 @@ describe("Should verifies the signin flow", () => {
       email: "test12345@gmail.com",
       password: "test1234",
       preferences: {
-        categories: [],
+        categories: [1, 2],
       },
     };
 
@@ -32,7 +33,18 @@ describe("Should verifies the signin flow", () => {
       .post("/register")
       .send(singupBody)
       .end((err, res) => {
-        done();
+        let signInBody = {
+          email: "test12345@gmail.com",
+          password: "test1234",
+        };
+        chai
+          .request(server)
+          .post("/login")
+          .send(signInBody)
+          .end((err, res) => {
+            accessToken = res.body.accessToken;
+            done();
+          });
       });
   });
 
@@ -48,53 +60,25 @@ describe("Should verifies the signin flow", () => {
     done();
   });
 
-  it("should be successful signin", (done) => {
-    let signInBody = {
-      email: "test12345@gmail.com",
-      password: "test1234",
-    };
-
+  it("should successfully retrive prefrences", (done) => {
     chai
       .request(server)
-      .post("/login")
-      .send(signInBody)
+      .get("/preferences")
+      .set("Authorization", "JWT " + accessToken)
       .end((err, res) => {
         expect(res.status).equal(200);
-        expect(res.body.email).equal("test12345@gmail.com");
-        expect(res.body.name).equal("test name");
-        expect(res.body).to.have.property("accessToken");
+        expect(res.body).to.have.property("categories");
         done();
       });
   });
 
-  it("should validate not registered email", (done) => {
-    let signInBody = {
-      email: "test@gmail.com",
-      password: "test1234",
-    };
+  it("should not retrive prefrences without Authorization header", (done) => {
     chai
       .request(server)
-      .post("/login")
-      .send(signInBody)
+      .get("/preferences")
       .end((err, res) => {
-        expect(res.status).equal(400);
-        expect(res.body.message).equal("Email is not registered");
-        done();
-      });
-  });
-
-  it("should validate invailed password", (done) => {
-    let signInBody = {
-      email: "test12345@gmail.com",
-      password: "test1239",
-    };
-    chai
-      .request(server)
-      .post("/login")
-      .send(signInBody)
-      .end((err, res) => {
-        expect(res.status).equal(400);
-        expect(res.body.message).equal("Invailed Password");
+        expect(res.status).equal(403);
+        expect(res.text).equal("Authorization header not found");
         done();
       });
   });

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon src/index.js",
-    "test": "mocha  --recursive 'test/**/*.js' --exit",
+    "test": "mocha --recursive 'test/**/*.js' --exit",
     "test-coverage": "c8 npm run test",
     "test-repoter": "c8 report --reporter=html"
   },
