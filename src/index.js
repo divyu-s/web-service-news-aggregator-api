@@ -23,3 +23,5 @@ app.listen(PORT, (err) => {
     console.log("some error occured");
   }
 });
+
+export default app;

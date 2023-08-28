@@ -1,7 +1,6 @@
-import data from "../data.json" assert { type: "json" };
-import Joi from "joi";
 import fs from "fs";
 import path from "path";
+import { prefSchema } from "../validators/prefSchema.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
@@ -14,18 +13,27 @@ const __dirname = dirname(__filename);
  * @param {*} res
  */
 export const putPrefrencesController = async (req, res) => {
+  let data;
+  if (process.env.NODE_ENV === "test") {
+    data = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "..", "data_test.json"))
+    );
+  }
+  if (process.env.NODE_ENV === "dev") {
+    data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data.json")));
+  }
+
   if (req.user) {
     try {
-      let value = await Joi.object({
-        categories: Joi.array().required(),
-      }).validateAsync(req.body);
+      let value = await prefSchema.validateAsync(req.body);
       const userIndex = data.usersList.findIndex(
         (user) => user?.id === req?.user?.id
       );
-      data.usersList[userIndex].preferences = {
-        categories: req.body.categories,
-      };
-      const writePath = path.join(__dirname, "..", "data.json");
+      data.usersList[userIndex].preferences = req.body;
+      const writePath =
+        process.env.NODE_ENV === "test"
+          ? path.join(__dirname, "..", "data_test.json")
+          : path.join(__dirname, "..", "data.json");
       fs.writeFileSync(writePath, JSON.stringify(data), {
         encoding: "utf-8",
         flag: "w",

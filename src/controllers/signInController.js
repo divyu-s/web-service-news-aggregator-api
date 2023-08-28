@@ -1,7 +1,13 @@
-import Joi from "joi";
-import data from "../data.json" assert { type: "json" };
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { signInUserSchema } from "../validators/signInUserSchema.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Method handles signIn process
@@ -10,23 +16,21 @@ import jwt from "jsonwebtoken";
  * @returns
  */
 export const signInController = async (req, res) => {
+  let data;
+  if (process.env.NODE_ENV === "test") {
+    data = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "..", "data_test.json"))
+    );
+  }
+  if (process.env.NODE_ENV === "dev") {
+    data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data.json")));
+  }
+
   try {
-    let value = await Joi.object({
-      email: Joi.string()
-        .email({
-          minDomainSegments: 2,
-          tlds: { allow: ["com", "net"] },
-        })
-        .required(),
-      password: Joi.string().min(8).required(),
-    }).validateAsync({
-      email: req.body.email,
-      password: req.body.password,
-    });
+    let value = await signInUserSchema.validateAsync(req.body);
     const user = data.usersList.find((user) => user.email === value.email);
     if (!user) {
       throw { message: "Email is not registered" };
-      return;
     } else {
       const isPasswordVailed = bcrypt.compareSync(
         req.body.password,
@@ -34,7 +38,6 @@ export const signInController = async (req, res) => {
       );
       if (!isPasswordVailed) {
         throw { message: "Invailed Password" };
-        return;
       }
       const token = jwt.sign(
         {
