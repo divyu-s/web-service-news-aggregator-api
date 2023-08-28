@@ -6,16 +6,22 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import sinon from "sinon";
+import axios from "axios";
 
 chai.use(chaiHttp);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-describe("Should verifies retrive prefrences flow", () => {
+describe("Should verifies get news flow", () => {
   let singupBody;
   let fileContent;
   let accessToken;
   beforeEach((done) => {
+    sinon
+      .stub(axios, "get")
+      .resolves({ data: { articles: [{ test: "test" }] } });
+
     fileContent = JSON.parse(
       fs.readFileSync(path.join(__dirname, "..", "..", "src", "data_test.json"))
     );
@@ -49,6 +55,7 @@ describe("Should verifies retrive prefrences flow", () => {
   });
 
   afterEach((done) => {
+    sinon.restore();
     fs.writeFileSync(
       path.join(__dirname, "..", "..", "src", "data_test.json"),
       JSON.stringify(fileContent),
@@ -60,38 +67,55 @@ describe("Should verifies retrive prefrences flow", () => {
     done();
   });
 
-  it("should successfully retrive prefrences", (done) => {
+  it("should successfully get news if user preferences are not empty", (done) => {
     chai
       .request(server)
-      .get("/preferences")
+      .get("/news")
       .set("Authorization", "JWT " + accessToken)
       .end((err, res) => {
         expect(res.status).equal(200);
-        expect(res.body).to.have.property("categories");
+        expect(res.body).to.deep.equal([{ test: "test" }]);
         done();
       });
   });
 
-  it("should not retrive prefrences without Authorization header", (done) => {
+  it("should successfully get Cached news results ", (done) => {
     chai
       .request(server)
-      .get("/preferences")
+      .get("/news")
+      .set("Authorization", "JWT " + accessToken)
       .end((err, res) => {
-        expect(res.status).equal(403);
-        expect(res.text).equal("Authorization header not found");
-        done();
+        chai
+          .request(server)
+          .get("/news")
+          .set("Authorization", "JWT " + accessToken)
+          .end((err, res) => {
+            expect(res.body).to.deep.equal([{ test: "test" }]);
+            done();
+          });
       });
   });
 
-  it("should not retrive prefrences with invailed jwt token", (done) => {
+  it("should successfully get news if user preferences are empty", (done) => {
+    let pref = {
+      categories: [],
+    };
+
     chai
       .request(server)
-      .get("/preferences")
-      .set("Authorization", "JWT " + accessToken + "b")
+      .put("/preferences")
+      .set("Authorization", "JWT " + accessToken)
+      .send(pref)
       .end((err, res) => {
-        expect(res.status).equal(403);
-        expect(res.text).equal("Invailed JWT Token");
-        done();
+        chai
+          .request(server)
+          .get("/news")
+          .set("Authorization", "JWT " + accessToken)
+          .end((err, res) => {
+            expect(res.status).equal(200);
+            expect(res.body).to.deep.equal([{ test: "test" }]);
+            done();
+          });
       });
   });
 });

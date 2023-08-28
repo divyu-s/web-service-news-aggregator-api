@@ -34,7 +34,7 @@ export const getNewsController = (req, res) => {
     const path = `${GNEWS_API_PATH}?category=${query}&lang=en&apikey=${process.env.GNEWS_API_KEY}`;
 
     if (checkCache(path).cached) {
-      res.send(checkCache(path).data);
+      res.send(checkCache(path).data.data);
     } else {
       getData(path)
         .then((resp) => {
