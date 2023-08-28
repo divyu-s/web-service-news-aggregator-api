@@ -1,5 +1,3 @@
-import data from "../data.json" assert { type: "json" };
-import Joi from "joi";
 import fs from "fs";
 import path from "path";
 import { prefSchema } from "../validators/prefSchema.js";
@@ -15,6 +13,16 @@ const __dirname = dirname(__filename);
  * @param {*} res
  */
 export const putPrefrencesController = async (req, res) => {
+  let data;
+  if (process.env.NODE_ENV === "test") {
+    data = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "..", "data_test.json"))
+    );
+  }
+  if (process.env.NODE_ENV === "dev") {
+    data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data.json")));
+  }
+
   if (req.user) {
     try {
       let value = await prefSchema.validateAsync(req.body);
@@ -22,7 +30,10 @@ export const putPrefrencesController = async (req, res) => {
         (user) => user?.id === req?.user?.id
       );
       data.usersList[userIndex].preferences = req.body;
-      const writePath = path.join(__dirname, "..", "data.json");
+      const writePath =
+        process.env.NODE_ENV === "test"
+          ? path.join(__dirname, "..", "data_test.json")
+          : path.join(__dirname, "..", "data.json");
       fs.writeFileSync(writePath, JSON.stringify(data), {
         encoding: "utf-8",
         flag: "w",
