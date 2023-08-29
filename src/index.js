@@ -4,7 +4,16 @@ import registrationRoutes from "./routes/registrationRoutes.js";
 import preferencesRoutes from "./routes/preferencesRoutes.js";
 import newsRoutes from "./routes/newsRoute.js";
 import dotenv from "dotenv-flow";
+
 dotenv.config();
+
+const env = process.env.NODE_ENV || "dev";
+if (env === "test") {
+  process.env.USER_FILE_DB_NAME = "data_test.json";
+}
+if (env === "dev") {
+  process.env.USER_FILE_DB_NAME = "data.json";
+}
 
 const PORT = 3000;
 const app = express();

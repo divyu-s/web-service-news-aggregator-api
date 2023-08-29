@@ -14,15 +14,9 @@ const __dirname = dirname(__filename);
  * @param {*} res
  */
 export const signUpController = async (req, res) => {
-  let data;
-  if (process.env.NODE_ENV === "test") {
-    data = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "..", "data_test.json"))
-    );
-  }
-  if (process.env.NODE_ENV === "dev") {
-    data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data.json")));
-  }
+  let data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "..", process.env.USER_FILE_DB_NAME))
+  );
 
   try {
     let value = await signUpUserSchema.validateAsync({
@@ -39,10 +33,7 @@ export const signUpController = async (req, res) => {
     };
     data.usersList.push(value);
 
-    const writePath =
-      process.env.NODE_ENV === "test"
-        ? path.join(__dirname, "..", "data_test.json")
-        : path.join(__dirname, "..", "data.json");
+    const writePath = path.join(__dirname, "..", process.env.USER_FILE_DB_NAME);
     fs.writeFileSync(writePath, JSON.stringify(data), {
       encoding: "utf-8",
       flag: "w",

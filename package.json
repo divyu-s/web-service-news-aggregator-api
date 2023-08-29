@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon src/index.js",
-    "test": "mocha --recursive 'test/**/*.js' --exit",
+    "start": "set NODE_ENV=dev&&nodemon src/index.js",
+    "test": "set NODE_ENV=test&&mocha --recursive 'test/**/*.js' --exit",
     "test-coverage": "c8 npm run test",
     "test-repoter": "c8 report --reporter=html"
   },

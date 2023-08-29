@@ -16,15 +16,9 @@ const __dirname = dirname(__filename);
  * @returns
  */
 export const signInController = async (req, res) => {
-  let data;
-  if (process.env.NODE_ENV === "test") {
-    data = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "..", "data_test.json"))
-    );
-  }
-  if (process.env.NODE_ENV === "dev") {
-    data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data.json")));
-  }
+  let data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "..", process.env.USER_FILE_DB_NAME))
+  );
 
   try {
     let value = await signInUserSchema.validateAsync(req.body);

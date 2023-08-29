@@ -13,15 +13,9 @@ const __dirname = dirname(__filename);
  * @param {*} res
  */
 export const putPrefrencesController = async (req, res) => {
-  let data;
-  if (process.env.NODE_ENV === "test") {
-    data = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "..", "data_test.json"))
-    );
-  }
-  if (process.env.NODE_ENV === "dev") {
-    data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data.json")));
-  }
+  let data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "..", process.env.USER_FILE_DB_NAME))
+  );
 
   if (req.user) {
     try {
@@ -30,10 +24,11 @@ export const putPrefrencesController = async (req, res) => {
         (user) => user?.id === req?.user?.id
       );
       data.usersList[userIndex].preferences = req.body;
-      const writePath =
-        process.env.NODE_ENV === "test"
-          ? path.join(__dirname, "..", "data_test.json")
-          : path.join(__dirname, "..", "data.json");
+      const writePath = path.join(
+        __dirname,
+        "..",
+        process.env.USER_FILE_DB_NAME
+      );
       fs.writeFileSync(writePath, JSON.stringify(data), {
         encoding: "utf-8",
         flag: "w",
